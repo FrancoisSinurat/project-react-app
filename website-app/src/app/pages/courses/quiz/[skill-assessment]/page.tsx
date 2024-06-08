@@ -102,8 +102,19 @@ const SkillAssessment: React.FC = () => {
     answers[questionId] = answerId;
     methods.setValue('answers', answers);
   };
-
-  const calculateScores = (selectedAnswers: AnswerState) => {
+  const saveAnswer = async (id_assessment: number, id_answer: number) => {
+    try {
+      const postData = {
+        id_user: context.userId,
+        id_assessment: id_assessment,
+        id_answer: id_answer,
+      };
+      await axios.post("/api/saved-answer", postData);
+    } catch (error) {
+      console.error("Error saving score:", error);
+    }
+  };
+  const calculateScores = async (selectedAnswers: AnswerState) => {
     const scores: { [key: string]: number } = {};
     console.log(questions)
     console.log(selectedAnswers)
@@ -112,6 +123,7 @@ const SkillAssessment: React.FC = () => {
       var weight = 0
       const question = questions.find((question) => question.id_assessment === parseInt(key));
       const answer = answers.find((answer) => answer.id_answer === selectedAnswerId);
+      saveAnswer(question?.id_assessment, answer?.id_answer)
       if(question.level=="FUNDAMENTAL"){
         weight = 4
       } else if(question.level=="BEGINNER"){
