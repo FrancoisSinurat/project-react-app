@@ -33,11 +33,10 @@ export async function POST(request: { json: () => PromiseLike<{ id_user: any; le
     const { id_user, learning_path, assessment_point } = await request.json();
     console.log(id_user, learning_path, assessment_point);
 
-    const result = await db.query("INSERT INTO score SET ?", {
-      id_user, 
-      learning_path, 
-      assessment_point, 
-    });
+    const result = await db.query(
+      "UPDATE score SET assessment_point = ? WHERE id_user = ? AND learning_path = ?",
+      [assessment_point, id_user, learning_path]
+    );
 
     return NextResponse.json({ id_user, learning_path, assessment_point, id: result.insertId });
   } catch (error) {

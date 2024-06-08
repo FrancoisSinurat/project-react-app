@@ -57,7 +57,7 @@ const CoursePage = () => {
       <div className='text-3xl h-2/6 mb-3'>
         {recommendedCourses.length === 0 ? (
           <button>
-            <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
+            <a href="/pages/courses/preferensi">Isi quiz untuk rekomendasi terbaikmu sekarang!</a>
           </button>
         ) : (
           <div className='recommended-courses p-5'>

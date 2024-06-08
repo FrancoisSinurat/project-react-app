@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import Context from '../../../context/context';
 import { useRouter } from "next/navigation";
 import { ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import Link from 'next/link';
 
-const id_user = 255;
-
 const Rekomendasi: React.FC = () => {
   const [topPaths, setTopPaths] = useState<string[]>([]);
   const router = useRouter();
+  const context = useContext(Context);
 
   useEffect(() => {
     const fetchUserPaths = async () => {
       try {
-        const response = await axios.get(`/api/score-preferensi?id_user=${id_user}`);
+        const response = await axios.get(`/api/score-preferensi?id_user=${context?.userId}`);
         const userPaths = response.data;
+        console.log(response.data)
         setTopPaths(userPaths.map((path: { learning_path: string }) => path.learning_path));
       } catch (error) {
         console.error("Error fetching user learning paths:", error);

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
+import Context from '../../../../context/context';
 import axios from "axios";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const SkillAssessment: React.FC = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const context = useContext(Context);
 
   const methods = useForm<FormValues>({
     defaultValues: {
@@ -53,7 +55,6 @@ const SkillAssessment: React.FC = () => {
   const router = useRouter();
   const path = usePathname().split("/")[4].replace(/%20/g, ' ');
 
-  const id_user = "255";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,46 +103,42 @@ const SkillAssessment: React.FC = () => {
     methods.setValue('answers', answers);
   };
 
-  const calculateTotalPoint = (selectedAnswers: AnswerState): number => {
-    return Object.keys(selectedAnswers).reduce((total, key) => {
-      const selectedAnswerId = parseInt(selectedAnswers[key], 10);
-      const answer = answers.find(answer => answer.id_answer === selectedAnswerId);
-      return total + (answer ? answer.point : 0);
-    }, 0);
-  };
-
   const calculateScores = (selectedAnswers: AnswerState) => {
     const scores: { [key: string]: number } = {};
-
+    console.log(questions)
+    console.log(selectedAnswers)
     Object.keys(selectedAnswers).forEach((key) => {
       const selectedAnswerId = parseInt(selectedAnswers[key], 10);
+      var weight = 0
+      const question = questions.find((question) => question.id_assessment === parseInt(key));
       const answer = answers.find((answer) => answer.id_answer === selectedAnswerId);
-      if (answer) {
-        scores[answer.learning_path] = (scores[answer.learning_path] || 0) + answer.point;
+      if(question.level=="FUNDAMENTAL"){
+        weight = 4
+      } else if(question.level=="BEGINNER"){
+        weight = 8
+      } else if(question.level=="INTERMEDIATE"){
+        weight = 12
+      } else {
+        weight = 16
       }
-    });
-
+      if (answer) {
+        scores[answer.learning_path] = (scores[answer.learning_path] || 0) + (answer.point*weight);
+      }
+      });
     return scores;
   };
 
   const onSubmit = async (data: FormValues) => {
     console.log("You submitted the following values:", data);
-    const totalPoint = calculateTotalPoint(data.answers);
-    const scores = calculateScores(data.answers);
-    const topScores = Object.entries(scores)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3);
-
+    const scores = calculateScores(data.answers);    
     try {
-      for (const [key, value] of topScores) {
         const postData = {
-          id_user: 255,
-          learning_path: key,
-          assessment_point: value,
+          id_user: context.userId,
+          learning_path: Object.keys(scores)[0],
+          assessment_point: scores[Object.keys(scores)[0]],
         };
         await axios.post("/api/score-assessment", postData);
-      }
-      router.push("/pages/courses");
+      // router.push("/pages/courses");
     } catch (error) {
       console.error("Error saving score:", error);
     }

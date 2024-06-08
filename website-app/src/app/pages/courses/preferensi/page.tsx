@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
+import Context from '../../../context/context';
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +43,7 @@ interface FormValues {
 }
 
 const Preferensi: React.FC = () => {
+  const context = useContext(Context);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -116,7 +118,7 @@ const Preferensi: React.FC = () => {
 
     topScores.forEach(([key, value]) => {
       const postData = {
-        id_user: 255,
+        id_user: context?.userId,
         learning_path: key,
         preferensi_point: value,
       };

@@ -8,9 +8,14 @@ const MyComponent = () => {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        const response = await axios.post('http://localhost:5000/predict', {user_id: 1779449,});
-        setRecommendations(response.data);
-        console.log(response.data)
+        await axios.post('http://localhost:5000/predict', { user_id: 401 }, { headers: { 'Content-Type': 'application/json' } })
+        .then((response) => {
+          setRecommendations(response.data);
+          console.log(response.data)
+        })
+        .catch((error) => {
+          console.error(error);
+        });;
       } catch (error) {
         console.error("Error fetching recommendations:", error);
       }
