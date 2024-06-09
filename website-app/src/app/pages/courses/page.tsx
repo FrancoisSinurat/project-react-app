@@ -28,28 +28,60 @@ interface Course {
 const CoursePage = () => {
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
-
+  const [recommendations, setRecommendations] = useState([]);
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get('/api/courses');
-        setAllCourses(response.data);
+        await axios.get('/api/courses')
+        .then((responseCourse) => {
+          setAllCourses(responseCourse.data);
+          const level = localStorage.getItem("level");
+          const learning_path = localStorage.getItem("learning_path");
+  
+          if (level && learning_path) {
+            const recommended = responseCourse.data.filter((course: Course) =>
+              course.level === level && course.learning_path === learning_path
+            ).slice(0, 3);
+            setRecommendedCourses(recommended);
+          }
+          try {
+            axios.post('http://localhost:5000/predict-course', { user_id: 105 }, { headers: { 'Content-Type': 'application/json' } })
+            .then((responseRec) => {
+              console.log("model ===========================================================================")
+              const filteredData = responseCourse.data.filter((item: any) => responseRec.data.id.includes(item.id));
+              console.log(responseRec.data)
+              console.log(filteredData)
+            })
+            .catch((error) => {
+              console.error(error);
+            });;
+          } catch (error) {
+            console.error("Error fetching recommendations:", error);
+          }
+        });
 
-        const level = localStorage.getItem("level");
-        const learning_path = localStorage.getItem("learning_path");
-
-        if (level && learning_path) {
-          const recommended = response.data.filter((course: Course) =>
-            course.level === level && course.learning_path === learning_path
-          ).slice(0, 3);
-          setRecommendedCourses(recommended);
-        }
       } catch (error) {
         console.error('Error fetching courses:', error);
       }
     };
-
+    const fetchRecommendations = async () => {
+      try {
+        await axios.post('http://localhost:5000/predict-course', { user_id: 105 }, { headers: { 'Content-Type': 'application/json' } })
+        .then((response) => {
+          setRecommendations(response.data);
+          console.log("model ===========================================================================")
+          console.log(response.data)
+          console.log(allCourses)
+        })
+        .catch((error) => {
+          console.error(error);
+        });;
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+      }
+    };
     fetchCourses();
+    fetchRecommendations();
   }, []);
 
   return (

@@ -8,7 +8,7 @@ const MyComponent = () => {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        await axios.post('http://localhost:5000/predict', { user_id: 401 }, { headers: { 'Content-Type': 'application/json' } })
+        await axios.post('http://localhost:5000/predict-job', { user_id: 401 }, { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
           setRecommendations(response.data);
           console.log(response.data)
