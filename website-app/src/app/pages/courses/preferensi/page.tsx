@@ -171,6 +171,7 @@ const Preferensi: React.FC = () => {
 
   return (
     <div>
+      <h2 className="font-bolder text-[#1B4332] text-3xl mb-4">Preferensi Quiz</h2>
       <FormProvider {...methods}>
         <form className="space-y-6">
           <Carousel setApi={setApi}>

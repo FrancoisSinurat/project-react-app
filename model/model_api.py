@@ -225,12 +225,13 @@ def predict_course():
     if ratings_for_course[ratings_for_course['user_id'] == user_id].empty:
         print("Cold Start User Detected")
         recommended_courses = get_cold_start_recommendations(courses_for_course, ratings_for_course)
+        recommended_course_ratings = recommended_courses['popularity'].tolist()
     else:
         recommended_courses = get_recommendations(user_id, model, courses_for_course, ratings_for_course, ratings_pivot, predicted_ratings_full)
+        recommended_course_ratings = recommended_courses['predicted_rating'].tolist()
     # Mengembalikan rekomendasi sebagai JSON
     recommended_course_ids = recommended_courses['id'].tolist()
-    print(recommended_courses["id"])
-    return jsonify({'id': recommended_course_ids, 'rating':dasdasd})
+    return jsonify({'id': recommended_course_ids, "ratings": recommended_course_ratings})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -7,7 +7,7 @@ interface MyContextProps {
 
 const MyContext = createContext<MyContextProps | undefined>(undefined);
 export const MyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [userId, setUserId] = useState<number>(401);
+  const [userId, setUserId] = useState<number>(105);
   return (
     <MyContext.Provider value={{ userId, setUserId }}>
       {children}

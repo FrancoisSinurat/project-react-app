@@ -14,7 +14,7 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
   const pathname = usePathname();
 
   return (
-    <aside className='w-[200px] max-w-xs h-screen fixed left-0 top-0 z-40 border-r border-[#e6e7f0]'>
+    <aside className='w-[15%] max-w-xs h-screen fixed left-0 top-0 z-40 border-r border-[#e6e7f0]'>
       
       <div className='h-full px-3 py-4'>
         

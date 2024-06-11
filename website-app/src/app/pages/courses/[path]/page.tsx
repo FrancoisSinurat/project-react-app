@@ -31,15 +31,17 @@ const LearningPath: FC = () => {
   const router = useRouter();
   const path = usePathname();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [learningPath, setLearningPath] = useState<string>("");
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
 
   useEffect(() => {
+    const pathName = path.split("/")[3].replace(/%20/g, ' ')
+    setLearningPath(pathName)
     const fetchCourses = async () => {
       try {
         const response = await axios.get('/api/courses');
         setCourses(response.data);
 
-        const pathName = getPath();
         const filtered = response.data.filter((course: Course) => course.learning_path === pathName);
         setFilteredCourses(filtered);
       } catch (error) {
@@ -49,56 +51,15 @@ const LearningPath: FC = () => {
 
     fetchCourses();
   }, [path]);
-
-  const getPath = (): string => {
-    switch (path.split("/")[3]) {
-      case '1':
-        return 'Machine Learning Developer';
-      case '2':
-        return 'Android Developer';
-      case '3':
-        return 'iOS Developer';
-      case '4':
-        return 'Multi-Platform App Developer';
-      case '5':
-        return 'Data Scientist';
-      default:
-        return 'Learning Path';
-    }
-  };
-
   return (
     <main>
       <div className='course-header text-3xl h-2/6 mb-3 shadow-inner rounded-[0.6rem]'>
-        <button>
-          <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
-        </button>
-      </div>
-      <div className='w-full pl-12'>
-        <Carousel className='w-11/12'>
-          <CarouselContent>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses'><Button className='w-5/6' variant="ghost">All</Button></Link>
-            </CarouselItem>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses/1'><Button className='w-5/6' variant="ghost">Machine Learning</Button></Link>
-            </CarouselItem>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses/2'><Button className='w-5/6' variant="ghost">Android</Button></Link>
-            </CarouselItem>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses/3'><Button className='w-5/6' variant="ghost">IOS</Button></Link>
-            </CarouselItem>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses/4'><Button className='w-5/6' variant="ghost">Multi-Platform App</Button></Link>
-            </CarouselItem>
-            <CarouselItem className="basis-1/5 flex justify-center">
-              <Link href='/pages/courses/5'><Button className='w-5/6' variant="ghost">Data Science</Button></Link>
-            </CarouselItem>
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <p>Learning Path {learningPath}</p>
+        <a href={`/pages/courses/quiz/${learningPath}`} className='text-sm font-bold'>
+          <button className='bg-[#1B4332] text-white rounded mt-3 p-2'>
+            Ikuti Skill Assessment
+          </button>
+        </a>
       </div>
       <div className='courses min-h-[80vh] shadow-inner rounded-[0.6rem]'>
         <div className='course-wrapper grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>

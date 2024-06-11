@@ -9,7 +9,7 @@ export async function GET(request: { nextUrl: { searchParams: { get: (arg0: stri
     }
 
     const results = await new Promise((resolve, reject) => {
-      db.query("SELECT learning_path FROM score WHERE id_user = ?", [id_user], (err: any, results: []) => {
+      db.query("SELECT id_user, learning_path, assessment_point FROM score WHERE id_user = ?", [id_user], (err: any, results: []) => {
         if (err) {
           reject(err);
         } else {

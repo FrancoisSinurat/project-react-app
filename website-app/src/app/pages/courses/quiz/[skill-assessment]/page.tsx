@@ -20,6 +20,7 @@ interface Question {
   id_assessment: number;
   question: string;
   learning_path: string;
+  level: string;
 }
 
 interface Answer {
@@ -103,47 +104,65 @@ const SkillAssessment: React.FC = () => {
     methods.setValue('answers', answers);
   };
   const saveAnswer = async (id_assessment: number, id_answer: number) => {
-    try {
-      const postData = {
-        id_user: context.userId,
-        id_assessment: id_assessment,
-        id_answer: id_answer,
-      };
-      await axios.post("/api/saved-answer", postData);
-    } catch (error) {
-      console.error("Error saving score:", error);
+    if (context && context.userId) {
+      try {
+        const postData = {
+          id_user: context.userId,
+          id_assessment: id_assessment,
+          id_answer: id_answer,
+        };
+        await axios.post("/api/saved-answer", postData);
+      } catch (error) {
+        console.error("Error saving score:", error);
+      }
+    } else {
+      console.error("Context or userId is undefined");
     }
   };
   const calculateScores = async (selectedAnswers: AnswerState) => {
     const scores: { [key: string]: number } = {};
-    console.log(questions)
-    console.log(selectedAnswers)
-    Object.keys(selectedAnswers).forEach((key) => {
+    console.log(questions);
+    console.log(selectedAnswers);
+  
+    for (const key of Object.keys(selectedAnswers)) {
       const selectedAnswerId = parseInt(selectedAnswers[key], 10);
-      var weight = 0
-      const question = questions.find((question) => question.id_assessment === parseInt(key));
-      const answer = answers.find((answer) => answer.id_answer === selectedAnswerId);
-      saveAnswer(question?.id_assessment, answer?.id_answer)
-      if(question.level=="FUNDAMENTAL"){
-        weight = 4
-      } else if(question.level=="BEGINNER"){
-        weight = 8
-      } else if(question.level=="INTERMEDIATE"){
-        weight = 12
+      let weight = 0;
+  
+      const question = questions.find((q) => q.id_assessment === parseInt(key));
+      const answer = answers.find((a) => a.id_answer === selectedAnswerId);
+  
+      if (question && answer) {
+        saveAnswer(question.id_assessment, answer.id_answer);
+  
+        switch (question.level) {
+          case "FUNDAMENTAL":
+            weight = 4;
+            break;
+          case "BEGINNER":
+            weight = 8;
+            break;
+          case "INTERMEDIATE":
+            weight = 12;
+            break;
+          case "ADVANCED":
+            weight = 16;
+            break;
+          default:
+            weight = 0;
+        }
+  
+        scores[answer.learning_path] = (scores[answer.learning_path] || 0) + (answer.point * weight);
       } else {
-        weight = 16
+        console.error(`Question or answer not found for ID: ${key}`);
       }
-      if (answer) {
-        scores[answer.learning_path] = (scores[answer.learning_path] || 0) + (answer.point*weight);
-      }
-      });
+    }
     return scores;
   };
-
   const onSubmit = async (data: FormValues) => {
     console.log("You submitted the following values:", data);
-    const scores = calculateScores(data.answers);    
-    try {
+    const scores = await calculateScores(data.answers);    
+    if (context && context.userId) {
+      try {
         const postData = {
           id_user: context.userId,
           learning_path: Object.keys(scores)[0],
@@ -153,6 +172,9 @@ const SkillAssessment: React.FC = () => {
       // router.push("/pages/courses");
     } catch (error) {
       console.error("Error saving score:", error);
+    }
+    } else {
+      console.error("Context or userId is undefined");
     }
   };
 
