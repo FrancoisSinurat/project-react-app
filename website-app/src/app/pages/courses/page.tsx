@@ -42,7 +42,7 @@ const CoursePage = () => {
   };
   const fetchRecommendation = async (data: any) => {
     try {
-      const responseRec = await axios.post('http://localhost:5000/predict-course', { user_id: context?.userId }, { headers: { 'Content-Type': 'application/json' } });
+      const responseRec = await axios.post('https://rekomenin-app-model-sywxiullwa-et.a.run.app/predict-course', { user_id: context?.userId }, { headers: { 'Content-Type': 'application/json' } });
       const filteredData = data.filter((item: any) => responseRec.data.id.includes(item.id));
       var filteredIndex = 0;
       const dataWithRatings = filteredData.map((course: any) => {

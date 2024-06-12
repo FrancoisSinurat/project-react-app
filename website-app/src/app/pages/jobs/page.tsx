@@ -50,7 +50,7 @@ const Jobs = () => {
   };
   const fetchRecommendation = async (data: any) => {
     try {
-      await axios.post('http://localhost:5000/predict-job', { user_id: context?.userId }, { headers: { 'Content-Type': 'application/json' } })
+      await axios.post('https://rekomenin-app-model-sywxiullwa-et.a.run.app/predict-job', { user_id: context?.userId }, { headers: { 'Content-Type': 'application/json' } })
       .then((responseRec) => {
         const filteredData = data.filter((item: any) => responseRec.data.id.includes(item.id));
         var filteredIndex = 0
