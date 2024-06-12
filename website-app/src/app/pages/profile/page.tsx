@@ -53,6 +53,8 @@ const Profile = () => {
   const fetchRated = async () => {
     try {
       const response = await axios.get(`/api/ratings?id_user=${context?.userId}`);
+      setRatings(response.data)
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error("Error fetching recommendations:", error);
@@ -64,6 +66,7 @@ const Profile = () => {
       const response = await axios.get(`/api/score-assessment?id_user=${context?.userId}`);
       const filteredData = response.data.filter((item: any) => item.assessment_point != null);
       setScores(filteredData);
+      console.log(filteredData)
       return response.data;
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -132,7 +135,7 @@ const Profile = () => {
         </div>
         <h2 className='text-lg font-bold mb-4'>Skill Assessment History</h2>
         {scores.map((item:any)=>(
-        <div className="w-[300px] bg-white shadow p-4 mb-5">
+        <div className="w-[300px] bg-white shadow p-4 mb-5" key={item.id}>
           <div className="flex justify-between mb-8">
             <div>
               <p className="text-xl font-medium">{item.learning_path}</p>

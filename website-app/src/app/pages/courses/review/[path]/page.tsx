@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import Context from '../../../../context/context';
 import axios from "axios";
+import { Star, Clock, BarChart } from 'lucide-react';
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,6 +17,17 @@ import {
 } from "@/components/ui/carousel";
 import React from "react";
 
+interface Course {
+  id: number;
+  name: string;
+  technology: string;
+  hours_to_study: number;
+  rating: string;
+  level: string;
+  learning_path: string;
+  total_modules: number;
+  registered_students: number | string;
+}
 interface Question {
   id_assessment: number;
   question: string;
@@ -48,6 +60,7 @@ interface SavedAnswer {
 }
 
 const SkillAssessment: React.FC = () => {
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [savedAnswer, setSavedAnswer] = useState<SavedAnswer[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -60,7 +73,14 @@ const SkillAssessment: React.FC = () => {
   });
   const router = useRouter();
   const path = usePathname().split("/")[4].replace(/%20/g, ' ');
-
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get('/api/courses');
+      setAllCourses(response.data);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
   const fetchDataQuestion = async () => {
     try {
       const questionsResponse = await axios.get(`/api/skill-assessment?learning_path=${path}`);
@@ -97,7 +117,7 @@ const SkillAssessment: React.FC = () => {
   const getAllData = async () => {
     const saved = await fetchSaved();
     await fetchDataQuestion();
-
+    await fetchCourses()
     // Set default values for the answers
     const defaultValues = saved.reduce((acc: any, cur: any) => {
       acc[cur.id_assessment] = cur.id_answer.toString();
@@ -180,8 +200,50 @@ const SkillAssessment: React.FC = () => {
                       />
                     </FormControl>
                     {/* Tambahkan keterangan level dan apakah jawaban benar atau salah */}
-                    <div className={`${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
-                      {isCorrect ? `Pertanyaan ${question.level} terjawab benar` : `Pertanyaan ${question.level} terjawab salah`}
+                    <div>
+                      {!isCorrect ?
+                      <div>
+                        <h2 className="text-xl font-bold mt-4">Rekomendasi Course:</h2>
+                        <div className='flex overflow-x-auto px-4'>
+                          {allCourses.filter((item: any) => item.learning_path === path && item.level===question.level).map((course: any) => (
+                            <div key={course.id} className='course course-card mr-5 p-4 w-80 bg-white my-5 w-[320px]'>
+                            <div className='min-h-[70px]'>
+                              <h3 className='title'>
+                                {course.name}
+                              </h3>
+                              <p className='card-path'>{course.learning_path}</p>
+                            </div>
+                            <ul className='course-stat'>
+                              <li>
+                                <div className='flex items-center text-xs mr-3'>
+                                  <Clock size={20} className='mr-[0.5rem]' /> {course.hours_to_study} Jam
+                                </div>
+                              </li>
+                              <li>
+                                <div className='flex items-center text-xs mr-3'>
+                                  <Star size={20} className='mr-[0.5rem]' /> {course.rating}
+                                </div>
+                              </li>
+                              <li>
+                                <div className='flex items-center text-xs mr-3'>
+                                  <BarChart size={20} className='mr-[0.5rem]'/> {course.level}
+                                </div>
+                              </li>
+                            </ul>
+                            <div className='flex'>
+                              {course.technology.split(",").map((itemTech: any, index: any) => (
+                                <div key={index} className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
+                                  <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          ))}
+                        </div> 
+
+                      </div>
+                      : ""
+                    }
                     </div>
                   </CarouselItem>
                 );
