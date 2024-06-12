@@ -15,6 +15,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import React from "react";
+import LearningPath from "../../[path]/page";
 
 interface Question {
   id_assessment: number;
@@ -47,7 +48,7 @@ const SkillAssessment: React.FC = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const context = useContext(Context);
-
+  const [pathList, setPathList] = useState<string[]>([]);
   const methods = useForm<FormValues>({
     defaultValues: {
       answers: {},
@@ -60,6 +61,9 @@ const SkillAssessment: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const scoreData = await axios.get(`/api/score-assessment?id_user=${context?.userId}`);
+        const paths = scoreData.data.map((item:any) => item.learning_path);
+        setPathList(paths);
         const questionsResponse = await axios.get(`/api/skill-assessment?learning_path=${path}`);
         const answersResponse = await axios.get(`/api/answer-assessment?learning_path=${path}`);
 
@@ -160,19 +164,32 @@ const SkillAssessment: React.FC = () => {
   };
   const onSubmit = async (data: FormValues) => {
     console.log("You submitted the following values:", data);
-    const scores = await calculateScores(data.answers);    
+    const scores = await calculateScores(data.answers);  
+    const learningPath = Object.keys(scores)[0]
+    var postData={}
     if (context && context.userId) {
-      try {
-        const postData = {
+      if (pathList.includes(learningPath)) {
+        postData = {
           id_user: context.userId,
-          learning_path: Object.keys(scores)[0],
+          learning_path: learningPath,
           assessment_point: scores[Object.keys(scores)[0]],
+          action: "update"
         };
+      } else {
+        postData = {
+          id_user: context.userId,
+          learning_path: learningPath,
+          assessment_point: scores[Object.keys(scores)[0]],
+          action: "insert"
+        };
+      }
+      try {        
         await axios.post("/api/score-assessment", postData);
-      // router.push("/pages/courses");
-    } catch (error) {
-      console.error("Error saving score:", error);
-    }
+        router.push("/pages/courses/result/"+learningPath);
+        console.log(postData)
+      } catch (error) {
+        console.error("Error saving score:", error);
+      }
     } else {
       console.error("Context or userId is undefined");
     }

@@ -84,6 +84,7 @@ const CoursePage = () => {
   };
   const getAllData = async () => {
     const courses = await fetchCourses();
+    console.log(courses)
     await fetchLearningPath();
     await fetchRecommendation(courses);
     const preferensiScore = await fetchPreferensiScore()
@@ -101,7 +102,7 @@ const CoursePage = () => {
         } else {
           level="fundamental"
         }
-        const filteredData = courses.filter((course: any) => course.level.toLowerCase()==level && course.learning_path==rowAssessment.learning_path);
+          const filteredData = courses.filter((course: any) => course.level.toLowerCase()==level && course.learning_path==rowAssessment.learning_path);
           setRecommendationsQuiz(prevRecommendations => {
           const prevIds = prevRecommendations.map(item => item.id);
           const noDuplicate = filteredData.filter((newItem:any) => !prevIds.includes(newItem.id));

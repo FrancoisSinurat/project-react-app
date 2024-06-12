@@ -28,15 +28,23 @@ export async function GET(request: { nextUrl: { searchParams: { get: (arg0: stri
   }
 }
 
-export async function POST(request: { json: () => PromiseLike<{ id_user: any; learning_path: any; assessment_point: any;  }>}) {
+export async function POST(request: { json: () => PromiseLike<{ id_user: any; learning_path: any; assessment_point: any; action: string;  }>}) {
   try {
-    const { id_user, learning_path, assessment_point } = await request.json();
+    const { id_user, learning_path, assessment_point, action } = await request.json();
     console.log(id_user, learning_path, assessment_point);
-
-    const result = await db.query(
-      "UPDATE score SET assessment_point = ? WHERE id_user = ? AND learning_path = ?",
-      [assessment_point, id_user, learning_path]
-    );
+    var result;
+    if(action=="update"){
+      result = await db.query(
+        "UPDATE score SET assessment_point = ? WHERE id_user = ? AND learning_path = ?",
+        [assessment_point, id_user, learning_path]
+      );
+    } else {
+      result = await db.query("INSERT INTO score SET ?", {
+        id_user, 
+        learning_path, 
+        assessment_point, 
+      });
+    }
 
     return NextResponse.json({ id_user, learning_path, assessment_point, id: result.insertId });
   } catch (error) {
